@@ -1,0 +1,39 @@
+class Solution:
+    def countPalindromicSubsequences(self, s: str) -> int:
+        MOD = 10**9 + 7
+        n = len(s)
+        
+        # dp[i][j] = number of different palindromic subsequences in s[i..j]
+        dp = [[0] * n for _ in range(n)]
+        
+        for i in range(n):
+            dp[i][i] = 1  # single character is a palindrome
+        
+        for length in range(2, n + 1):
+            for i in range(n - length + 1):
+                j = i + length - 1
+                
+                if s[i] == s[j]:
+                    left, right = i + 1, j - 1
+                    
+                    # Find the first and last occurrence of s[i] inside (i, j)
+                    while left <= right and s[left] != s[i]:
+                        left += 1
+                    while left <= right and s[right] != s[i]:
+                        right -= 1
+                    
+                    if left > right:
+                        # No same character inside → all previous + 2 new ones (s[i] and s[i]s[j])
+                        dp[i][j] = dp[i + 1][j - 1] * 2 + 2
+                    elif left == right:
+                        # One same character inside
+                        dp[i][j] = dp[i + 1][j - 1] * 2 + 1
+                    else:
+                        # Multiple same characters inside
+                        dp[i][j] = dp[i + 1][j - 1] * 2 - dp[left + 1][right - 1]
+                else:
+                    dp[i][j] = dp[i][j - 1] + dp[i + 1][j] - dp[i + 1][j - 1]
+                
+                dp[i][j] = (dp[i][j] + MOD) % MOD  # handle negative values
+        
+        return dp[0][n - 1]
